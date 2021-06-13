@@ -4,6 +4,7 @@ import classes from "./AuthForm.module.css";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const[isLoading,setIsLoading] = useState(false)
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
 
@@ -13,38 +14,41 @@ const AuthForm = () => {
 
   const SubmitHandler = (e) => {
     e.preventDefault();
-    const enteredEmail = emailInputRef.current.value
-    const enteredPassword = passwordInputRef.current.value
+    const enteredEmail = emailInputRef.current.value;
+    const enteredPassword = passwordInputRef.current.value;
+    setIsLoading(true)
 
-    if(isLogin) {
-
+    if (isLogin) {
     } else {
+      fetch(
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBuMvzndMCLl88fz3-e_sPeWqPfw1Kyyzk",
 
-      fetch("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBuMvzndMCLl88fz3-e_sPeWqPfw1Kyyzk",
-      
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          email:enteredEmail,
-          password:enteredPassword,
-          returnSecureToken:true
-        }),
-        headers: {
-          'Content-Type': 'application/json'
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email: enteredEmail,
+            password: enteredPassword,
+            returnSecureToken: true,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
+      ).then((res) => {
 
-      }).then(res=> {
-
-        if(res.ok) {
-
+        setIsLoading(false)
+        if (res.ok) {
         } else {
+          return res.json().then((data) => {
+            let errorMessage = 'Authentication Failed'
+            if(data && data.error && data.error.message) {
 
-         return res.json().then(data=>{
-
-            console.log(data)
-          })
+              errorMessage = data.error.message
+            }
+            alert(errorMessage)
+          });
         }
-      })
+      });
     }
   };
 
@@ -54,11 +58,16 @@ const AuthForm = () => {
       <form onSubmit={SubmitHandler}>
         <div className={classes.control}>
           <label htmlFor="email">Your Email</label>
-          <input type="email" id="email" required  ref ={emailInputRef}/>
+          <input type="email" id="email" required ref={emailInputRef} />
         </div>
         <div className={classes.control}>
           <label htmlFor="password">Your Password</label>
-          <input type="password" id="password" required ref = {passwordInputRef}/>
+          <input
+            type="password"
+            id="password"
+            required
+            ref={passwordInputRef}
+          />
         </div>
         <div className={classes.actions}>
           <button>{isLogin ? "Login" : "Create Account"}</button>
