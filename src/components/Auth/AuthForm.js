@@ -4,7 +4,7 @@ import classes from "./AuthForm.module.css";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const[isLoading,setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
 
@@ -16,40 +16,48 @@ const AuthForm = () => {
     e.preventDefault();
     const enteredEmail = emailInputRef.current.value;
     const enteredPassword = passwordInputRef.current.value;
-    setIsLoading(true)
+    setIsLoading(true);
+    let URL = "";
 
     if (isLogin) {
+      URL =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBuMvzndMCLl88fz3-e_sPeWqPfw1Kyyzk";
     } else {
-      fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBuMvzndMCLl88fz3-e_sPeWqPfw1Kyyzk",
-
-        {
-          method: "POST",
-          body: JSON.stringify({
-            email: enteredEmail,
-            password: enteredPassword,
-            returnSecureToken: true,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      ).then((res) => {
-
-        setIsLoading(false)
+      URL =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBuMvzndMCLl88fz3-e_sPeWqPfw1Kyyzk";
+    }
+    fetch(URL, {
+      method: "POST",
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        setIsLoading(false);
         if (res.ok) {
+          return res.json();
         } else {
           return res.json().then((data) => {
-            let errorMessage = 'Authentication Failed'
-            if(data && data.error && data.error.message) {
-
-              errorMessage = data.error.message
+            let errorMessage = "Authentication Failed";
+            if (data && data.error && data.error.message) {
+              errorMessage = data.error.message;
             }
-            alert(errorMessage)
+
+            throw new Error(errorMessage);
           });
         }
+      })
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => {
+        alert(err.message);
       });
-    }
   };
 
   return (
